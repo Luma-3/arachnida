@@ -47,12 +47,12 @@ class Parser(HTMLParser):
 
     def handle_starttag(self, tag, attrs: list[tuple[str, str]]):
         if tag == "a":
-            for (name, value) in attrs:
+            for name, value in attrs:
                 if name == "href" and not value.startswith("#"):
                     url = urljoin(self.current_url, value)
                     self.link.append(url)
         elif tag == "img":
-            for (name, value) in attrs:
+            for name, value in attrs:
                 self._handle_img(name, value)
 
 
@@ -65,7 +65,6 @@ class Spider:
         path: str,
         num_threads: int,
     ):
-
         self.recursive = recursive
         self.depth = depth
         self.startUrl = startUrl
@@ -95,7 +94,7 @@ class Spider:
             filename="spider.log",
             filemode="w",
             level=logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(message)s"
+            format="%(asctime)s - %(levelname)s - %(message)s",
         )
 
         self.logger = logging.getLogger("SpiderLogger")
@@ -134,8 +133,7 @@ class Spider:
 
         try:
             base_name = self.get_img_names(url)
-            self.download_stream(
-                url=url, path=os.path.join(self.path, base_name))
+            self.download_stream(url=url, path=os.path.join(self.path, base_name))
         except Exception:
             self.failures += 1
 
@@ -228,7 +226,6 @@ class Spider:
             return
 
         for link in parser.link:
-
             with self.lock:
                 if link in self.visited_pages:
                     continue
@@ -238,14 +235,15 @@ class Spider:
 
     def _display_crawl_status(self, stop_event):
         while not stop_event.is_set():
-            print(f"Pages explorées: {self.pages_crawled} | Images trouvées: {
-                  len(self.found_images)}", end='\r')
+            print(
+                f"Pages explorées: {self.pages_crawled} | Images trouvées: {len(self.found_images)}",
+                end="\r",
+            )
             time.sleep(0.1)
         print()
 
     def start_crawl(self):
-        self.logger.info(f"Starting crawl form {
-                         self.startUrl} (depth={self.depth})")
+        self.logger.info(f"Starting crawl form {self.startUrl}(depth={self.depth})")
         print(f"Crawling started from {self.startUrl} with depth {self.depth}")
 
         self.visited_pages.add(self.startUrl)
@@ -253,7 +251,8 @@ class Spider:
 
         stop_display_event = threading.Event()
         display_thread = threading.Thread(
-            target=self._display_crawl_status, args=(stop_display_event,))
+            target=self._display_crawl_status, args=(stop_display_event,)
+        )
         display_thread.daemon = True
         display_thread.start()
 
@@ -272,8 +271,9 @@ class Spider:
         stop_display_event.set()
         display_thread.join()
 
-        self.logger.info(f"Crawling finished: {self.pages_crawled} pages, {
-                         len(self.found_images)} unique images found")
+        self.logger.info(
+            f"Crawling finished: {self.pages_crawled} pages, {len(self.found_images)} unique images found."
+        )
 
         print(f"""\
 Crawling finished.
@@ -297,5 +297,6 @@ Unique images found: {len(self.found_images)}
             return
         print("Starting image download...")
         self.start_download()
-        print(f"Download finished. Total images downloaded: {
-              self.total_downloaded}, Failures: {self.failures}")
+        print(
+            f"Download finished. Total images downloaded: {self.total_downloaded}, Failures: {self.failures}"
+        )
